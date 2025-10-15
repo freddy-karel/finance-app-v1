@@ -1,0 +1,1 @@
+import { test, expect } from '@playwright/test'; test('Distribution smoke', async({page})=>{ await page.goto('/(app)/distribution'); await expect(page.getByTestId('distribution-summary')).toBeVisible(); });

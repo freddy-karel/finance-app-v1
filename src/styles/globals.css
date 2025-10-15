@@ -1,0 +1,38 @@
+/* stylelint-disable at-rule-no-unknown */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	html, body, #__next { height: 100%; }
+	/* Avoid using @apply to keep editor/stylelint happy; use explicit CSS values matching tailwind.config.ts */
+	body { background-color: #121418; color: #ffffff; }
+/* Improved UI tokens */
+:root{
+  --bg-surface: #0f1113;
+  --bg-card: #131417;
+  --primary: #5b8cff;
+  --secondary: #8ce0ff;
+  --muted: #9aa4b2;
+}
+
+@layer components{
+  .bg-surface{ background-color: var(--bg-surface); }
+  .bg-card{ background-color: var(--bg-card); }
+  .text-muted{ color: var(--muted); }
+  .shadow-card{ box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .nav-dot { width: 8px; height: 8px; border-radius: 9999px; display: inline-block; }
+  .btn-primary { background: linear-gradient(90deg, var(--primary), var(--secondary)); }
+}
+
+/* Accessibility helpers */
+.skip-link{ position: absolute; left: -9999px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.skip-link:focus{ left: 1rem; top: 1rem; width: auto; height: auto; padding: .5rem .75rem; background: var(--primary); color: white; z-index: 50; border-radius: .375rem; box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
+
+/* Focus-visible style used by interactive elements */
+.focus-ring:focus-visible{ outline: none; box-shadow: 0 0 0 4px rgba(91,140,255,0.18); border-radius: .375rem; }
+
+/* Ensure interactive elements have sufficient contrast on hover/focus */
+button, input, select, a { color: #ffffff; }
+
+}

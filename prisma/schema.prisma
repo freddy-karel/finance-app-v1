@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("operator")
+  createdAt DateTime @default(now())
+}
+
+model Envelope {
+  id        String                  @id @default(cuid())
+  name      String
+  emoji     String?
+  protected Boolean                 @default(false)
+  active    Boolean                 @default(true)
+  /// Type d'enveloppe (peut véhiculer des politiques : interdits/dérogations)
+  typeId    String?
+  type      ChargeType? @relation(fields: [typeId], references: [id])
+  createdAt DateTime                @default(now())
+  items     DistributionRuleItem[]
+  allocs    TransactionAllocation[]
+}
+
+model Service {
+  id        String        @id @default(cuid())
+  name      String
+  active    Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  txs       Transaction[]
+}
+
+model Transaction {
+  id        String                  @id @default(cuid())
+  kind      String
+  label     String
+  amount    Int
+  at        DateTime
+  serviceId String?
+  service   Service?                @relation(fields: [serviceId], references: [id])
+  allocs    TransactionAllocation[]
+  anomalies Anomaly[]
+}
+
+model TransactionAllocation {
+  id            String      @id @default(cuid())
+  transactionId String
+  envelopeId    String
+  amount        Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  envelope      Envelope    @relation(fields: [envelopeId], references: [id])
+}
+
+model DistributionRule {
+  id       String                 @id @default(cuid())
+  startsAt DateTime
+  endsAt   DateTime?
+  items    DistributionRuleItem[]
+}
+
+model DistributionRuleItem {
+  id         String           @id @default(cuid())
+  ruleId     String
+  envelopeId String
+  percent    Int
+  rule       DistributionRule @relation(fields: [ruleId], references: [id])
+  envelope   Envelope         @relation(fields: [envelopeId], references: [id])
+}
+
+model Anomaly {
+  id            String       @id @default(cuid())
+  level         String
+  code          String
+  details       String
+  createdAt     DateTime     @default(now())
+  resolvedAt    DateTime?
+  transactionId String?
+  tx            Transaction? @relation(fields: [transactionId], references: [id])
+}
+
+model ChargeType {
+  id        String   @id @default(cuid())
+  /// Code stable (ex: LOYER, TRANSPORT) — unique
+  code      String   @unique
+  /// Libellé lisible (ex: Loyer)
+  name      String
+  /// Politiques (JSON) — voir src/server/validators/policies.ts
+  policies  Json?
+  createdAt DateTime @default(now())
+  envelopes Envelope[]
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  metaJson  String?
+  createdAt DateTime @default(now())
+}
